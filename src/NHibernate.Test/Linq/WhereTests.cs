@@ -416,6 +416,34 @@ namespace NHibernate.Test.Linq
 		}
 
 		[Test]
+		public void UsersWithListContains_MutatingListDoesNotBreakOtherSessions()
+		{
+			using (var firstSession = OpenSession ()) {
+				var names = new List<string> { "ayende", "rahien" };
+
+				var query = (from user in firstSession.Query<User> ()
+							 where names.Contains(user.Name)
+							 select user).ToList();
+
+				names.Clear ();
+
+				Assert.AreEqual(2, query.Count);
+			}
+
+			using (var secondSession = OpenSession ()) {
+				var names = new List<string> { "ayende" };
+
+				var query = (from user in secondSession.Query<User> ()
+							 where names.Contains(user.Name)
+							 select user).ToList();
+
+				// This line fails with Expected: 1 But was: 0
+				// The SQL in NHProf shows that the where clause was executed as WHERE 1 = 0 as if names were empty
+				Assert.AreEqual(1, query.Count);
+			}
+		}
+
+		[Test]
 		public void UsersWithEmptyList_NH2400()
 		{
 			var names = new List<string>();
