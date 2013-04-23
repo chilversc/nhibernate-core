@@ -7,13 +7,14 @@
 		<id name="Name" unsaved-value="any">
 			<generator class="assigned" />
 		</id>
+		<many-to-one name="Parent" column="parentName" access="nosetter.camelcase" not-null="true"/>
 	</class>
 
 	<class name="Parent">
 		<id name="Name" unsaved-value="any">
 			<generator class="assigned" />
 		</id>
-		<bag name="Children" fetch="subselect" cascade="all-delete-orphan" inverse="false" lazy="true">
+		<bag name="Children" fetch="subselect" cascade="all-delete-orphan" inverse="true" lazy="true">
 			<key column="parentName" not-null="true"/>
 			<one-to-many class="Child"/>
 		</bag>
