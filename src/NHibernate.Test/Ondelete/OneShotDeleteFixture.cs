@@ -23,7 +23,7 @@ namespace NHibernate.Test.Ondelete
 		}
 
 		[Test]
-		public void OneShotDeleteCascade()
+		public void CascadingDelete()
 		{
 			var statistics = sessions.Statistics;
 
@@ -46,6 +46,40 @@ namespace NHibernate.Test.Ondelete
 			}
 
 			Assert.AreEqual(2, statistics.PrepareStatementCount);
+		}
+
+		[Test]
+		public void ClearingCollection()
+		{
+			var statistics = sessions.Statistics;
+
+			using (var session = OpenSession())
+			using (var tx = session.BeginTransaction()) {
+				var parent = new Parent("Bob");
+				parent.Children.Add(new Child(parent, "Jim"));
+				parent.Children.Add(new Child(parent, "Tim"));
+				session.Save(parent);
+				tx.Commit();
+			}
+
+			using (var session = OpenSession())
+			using (var tx = session.BeginTransaction()) {
+				var parent = session.Get<Parent>("Bob");
+
+				statistics.Clear();
+				parent.Children.Clear();
+				tx.Commit();
+			}
+
+			Assert.AreEqual(1, statistics.PrepareStatementCount);
+
+			using (var session = OpenSession())
+			using (var tx = session.BeginTransaction()) {
+				var parent = session.Get<Parent>("Bob");
+				Assert.IsEmpty(parent.Children);
+				session.Delete (parent);
+				tx.Commit();
+			}
 		}
 	}
 }
