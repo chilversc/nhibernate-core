@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2"
+				   assembly="NHibernate.Test"
+				   namespace="NHibernate.Test.Ondelete">
+
+	<class name="Child">
+		<id name="Name" unsaved-value="any">
+			<generator class="assigned" />
+		</id>
+	</class>
+
+	<class name="Parent">
+		<id name="Name" unsaved-value="any">
+			<generator class="assigned" />
+		</id>
+		<bag name="Children" fetch="subselect" cascade="all" inverse="false" lazy="true">
+			<key column="parentName" not-null="true"/>
+			<one-to-many class="Child"/>
+		</bag>
+	</class>
+
+</hibernate-mapping>
